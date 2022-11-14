@@ -41,10 +41,10 @@ services:
   logstash:
     container_name: logstash
     image: docker.elastic.co/logstash/logstash:7.6.2
-    #volumes:
-    #  - "./logstash.conf:/config-dir/logstash.conf"
-    #restart: always
-    #command: logstash -f /config-dir/logstash.conf
+    volumes:
+      - "./logstash.conf:/config-dir/logstash.conf"
+    restart: always
+    command: logstash -f /config-dir/logstash.conf
     ports:
       - "9600:9600"
       - "7777:7777"
