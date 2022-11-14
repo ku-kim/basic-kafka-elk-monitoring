@@ -1,0 +1,104 @@
+version: "3.7"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+        memlock:
+            soft: -1
+            hard: -1
+        nofile:
+            soft: 65536
+            hard: 65536
+    cap_add:
+      - IPC_LOCK
+#    command: elasticsearch-plugin install analysis-nori
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - elk-kafka
+
+  kinaba:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    container_name: kinaba
+    restart: always
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk-kafka
+
+  logstash:
+    container_name: logstash
+    image: docker.elastic.co/logstash/logstash:7.6.2
+    #volumes:
+    #  - "./logstash.conf:/config-dir/logstash.conf"
+    #restart: always
+    #command: logstash -f /config-dir/logstash.conf
+    ports:
+      - "9600:9600"
+      - "7777:7777"
+    links:
+      - elasticsearch
+    networks:
+      - elk-kafka
+
+  zookeeper:
+    image: zookeeper
+    restart: always
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+    networks:
+      - elk-kafka
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 10.44.8.36 #[Personal IP]
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "registered_event:1:1,read_product_event:1:1,order_event:1:1,cancel_order_event:1:1,basket_event:1:1,failed_basket_event:1:1"
+
+    depends_on:
+      - zookeeper
+    networks:
+      - elk-kafka
+
+  kafka_manager:
+    image: hlebalbau/kafka-manager
+    container_name: kafka_manager
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+      APPLICATION_SECRET: "random-secret"
+    command:
+      - -Dpidfile.path=/dev/null
+    depends_on:
+      - kafka
+    networks:
+      - elk-kafka
+
+networks:
+  elk-kafka:
+    driver: bridge
+
+volumes:
+    elasticsearch-data:
