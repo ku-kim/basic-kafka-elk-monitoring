@@ -21,7 +21,7 @@
 이 저장소는 Kafka에 저장된 이벤트를 ELK Stack를 활용하여 실시간 모니터링 예제 입니다. 
 
 - docker-compose를 활용하여 kafka, elk stack를 구축합니다.
-- kafka에 dummy event를 생성하는 producer는 python 스크립트로 대체합니다. ([event는 총 6개](https://github.com/ku-kim/basic-kafka-elk-monitoring/issues/5))
+- kafka에 dummy event를 생성하는 producer는 python 스크립트로 대체합니다. ([event는 총 6개](https://github.com/ku-kim/basic-kafka-elk-monitoring/pull/8))
 
 # 아키텍처
 

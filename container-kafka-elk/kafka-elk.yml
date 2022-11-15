@@ -25,9 +25,9 @@ services:
     networks:
       - elk-kafka
 
-  kinaba:
+  kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
-    container_name: kinaba
+    container_name: kibana
     restart: always
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
